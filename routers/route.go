@@ -2,17 +2,16 @@ package routers
 
 import (
     "github.com/gin-gonic/gin"
-    "../controllers"
+    "go_cgi_project/controllers"
 )
 
 func InitRouter() *gin.Engine {
 
     router := gin.Default()
-    router.LoadHTMLGlob("views/*")
     //注册：
-    router.GET("/",controllers.IndexGet)
-    router.GET("/api/table",controllers.TableGet)
-    router.GET("/detail",controllers.DetailGet)
+    router.GET("/api/kv",controllers.KVGet)
+
+    //router.Get("/api/data",controllers.DataGet)
     return router
 
 }

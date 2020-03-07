@@ -1,12 +1,11 @@
 package main
 
 import (
-    "../myproject/routers"
-    db "../myproject/database"
+    "go_cgi_project/routers"
+    _"go_cgi_project/models"
 )
 
 func main() {
-    defer db.SqlDB.Close()
     router := routers.InitRouter()
     //静态资源
     router.Static("/static", "./static")

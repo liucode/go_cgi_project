@@ -1,95 +1,51 @@
 package models
 import (
-	_ "github.com/go-sql-driver/mysql"
-	_"fmt"
-	db "../database"
-	_"database/sql"
+    "fmt"
+
+    "github.com/jinzhu/gorm"
+    _ "github.com/jinzhu/gorm/dialects/mysql"
 	_"sort"
 )
 
 
-func QueryRows(sql string) [4]int{
-    var mytype string
-    var count int
-    var cmap [4]int
-    rows, err := db.SqlDB.Query(sql)
-    if err != nil {
-        panic(err.Error())
-    }
-    i:= 0
-    for rows.Next(){
-        err := rows.Scan(&mytype,&count)
-    if err != nil {
-        panic(err.Error())
-    }
-      cmap[i]=count
-      i++
-      if i>=4 {
-       break
-       }
- }   
- return cmap
-}
-func QueryCount(sql string) int{
-    var outcount int
-    rows, err := db.SqlDB.Query(sql)
-    if err != nil {
-        panic(err.Error())
-    }
-    for rows.Next() {
-    err := rows.Scan(&outcount)
-    if err != nil {
-        panic(err.Error())
-    }
-    }
-    return outcount
+var db  *gorm.DB
 
-}
-func ExistZero() (int,int){
-    //查询
-    zcsql := "select count(1) from zchang where price=0;"
-    zczero := QueryCount(zcsql)
-    
-    ecsql := "select count(1) from echang where price=0;"
-    eczero := QueryCount(ecsql)
-    return zczero,eczero
+func init() {
+    t_db, err := gorm.Open("mysql", "root:661020@tcp(127.0.0.1:3306)/base?charset=utf8&parseTime=True&loc=Local")
+    if err != nil{
+        panic("failed to connect database")
+    }
+    t_db.DB().SetMaxIdleConns(10)
+    t_db.DB().SetMaxOpenConns(100)
+    db = t_db //全局变量
 }
 
-func ExistD() (int,int){
-    //查询
-    zcsql := "select count(1) from zchang where price>0 and price<100;"
-    zczero := QueryCount(zcsql)
-    
-    ecsql := "select count(1) from echang where price>0 and price<100;"
-    eczero := QueryCount(ecsql)
-    return zczero,eczero
+
+type KV struct{
+    ID int `gorm:"type:int(20);column:id;primary_key"`
+    Appid int `gorm:"type:int(11);column:appid`
+    K string `gorm:"type:varchar(255);column:k`
+    V string `gorm:"type:text;column:v`
 }
 
-func ExistZ() (int,int){
-    //查询
-    zcsql := "select count(1) from zchang where price<1000 and price>=100;"
-    zczero := QueryCount(zcsql)
-    
-    ecsql := "select count(1) from echang where price<1000 and price>=100;"
-    eczero := QueryCount(ecsql)
-    return zczero,eczero
+type DATA struct {
+    ID int64 `gorm:"type:bigint(20);column:id;primary_key"`
+    Appid int `gorm:"type:int(11);column:appid`
+    SubAppid int `gorm:"type:int(11);column:subappid`
+    Tempid int `gorm:"type:int(11);column:tempid`
+    Sortid int `gorm:"type:int(11);column:sortid`
+    Title string `gorm:"type:text;column:title`
+    Content string `gorm:"type:text;column:content`
+    Pic string `gorm:"type:text;column:pic`
+    Video string `gorm:"type:text;column:video`
 }
 
-func ExistG() (int,int){
-    //查询
-    zcsql := "select count(1) from zchang where price>=1000;"
-    zczero := QueryCount(zcsql)
-    
-    ecsql := "select count(1) from echang where price>=1000;"
-    eczero := QueryCount(ecsql)
-    return zczero,eczero
-}
 
-func GetType() ([4]int,[4]int){
-    zcsql := "select type,count(1) from zchang group by type order by type;"
-    zcmap := QueryRows(zcsql)
-    
-    ecsql := "select type,count(1) from echang group by type order by type;"
-    ecmap := QueryRows(ecsql)
-    return zcmap,ecmap
+func GetV(appid int,k string) (v string){
+    var data KV
+    fmt.Println(db)
+    db.Table("kv").Where("appid=?",appid).Where("k=?",k).First(&data)
+    fmt.Println("result: ",data)
+    v = data.V
+    return 
 }

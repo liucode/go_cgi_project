@@ -1,0 +1,12 @@
+{
+	"comment": "",
+	"ignore": "test",
+	"package": [
+		{
+			"path": "github.com/gin-gonic/gin",
+			"revision": "v1.3",
+			"version": "v1.3"
+		}
+	],
+	"rootPath": "go_cgi_project"
+}
