@@ -8,8 +8,23 @@ import (
 func InitRouter() *gin.Engine {
 
     router := gin.Default()
-    //注册：
-    router.GET("/api/kv",controllers.KVGet)
+    
+    v1 := router.Group("/api")
+    //通过appid+key可以唯一定位
+    v1.GET("/kvGet",controllers.KVGet)
+    v1.POST("/kvPost",controllers.KVPost)
+    v1.DELETE("/kvDelete",controllers.KVDelete)
+
+    v1.GET("/kvGetbyId",controllers.KVGetbyId)
+    //v1.POST("/kvUpdatebyId",controllers.KVPostbyId) //kv的更新不提供根据id
+    v1.DELETE("/kvDeletebyId",controllers.KVDeletebyId)
+
+    v1.GET("/dataGet",controllers.DataGet)
+    v1.GET("/dataGetbyId",controllers.DataGetbyId)
+    v1.POST("/dataUpdate",controllers.DataUpdate)
+    v1.POST("/dataCreate",controllers.DataCreate)
+    v1.DELETE("/dataDelete",controllers.DataDelete)
+
 
     //router.Get("/api/data",controllers.DataGet)
     return router
