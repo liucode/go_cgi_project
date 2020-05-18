@@ -26,6 +26,9 @@ func InitRouter() *gin.Engine {
     v1.DELETE("/dataDelete",controllers.DataDelete)
 
 
+    v1.GET("/treeGetbyId",controllers.TreeGetById)
+    v1.GET("/treeGetbyName",controllers.TreeGetByName)
+
     //router.Get("/api/data",controllers.DataGet)
     return router
 

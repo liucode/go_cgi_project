@@ -9,7 +9,34 @@ import (
 )
 
 
+func TreeGetByName(c *gin.Context){
+    var jzcase common.JIAZUCASE
+    if c.ShouldBind(&jzcase) != nil {
+        c.String(http.StatusBadRequest,string("参数错误"))
+        return
+    }
+    if jzcase.Name == "" {
+        c.String(http.StatusBadRequest,string("参数错误"))
+        return
+    }
+    outv := models.GetTreeByName(jzcase.Name)
+    c.String(http.StatusOK,string(outv))
+}
 
+
+func TreeGetById(c *gin.Context){
+    var jzcase common.JIAZUCASE
+    if c.ShouldBind(&jzcase) != nil {
+        c.String(http.StatusBadRequest,string("参数错误"))
+        return
+    }
+    fmt.Println(jzcase)
+    if jzcase.ID == 0{
+        jzcase.ID = 1
+    }
+    outv := models.GetTreeById(jzcase.ID)
+    c.String(http.StatusOK,string(outv))
+}
 
 
 //KV TABLE

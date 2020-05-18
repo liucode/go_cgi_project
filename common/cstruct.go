@@ -36,3 +36,25 @@ type DATA struct {
     Pic string `gorm:"type:text;column:pic`
     Video string `gorm:"type:text;column:video`
 }
+
+type JiaZu struct {
+    Id int `gorm:"type:bigint(20);column:id;primary_key"`
+    Name string `gorm:"type:varchar(255);column:name`
+    OtherName string `gorm:"type:varchar(255);column:other_name`
+    FatherId int `gorm:"type:int(11);column:father_id`
+    SortId int `gorm:"type:int(11);column:sort_id`
+    VersionId int `gorm:"type:text;column:version_id`
+    Other string `gorm:"type:text;column:other`
+}
+
+type TreeNode struct{
+    Name        string  `json:"name"`
+    Value       string  `json:"value"`
+    Children    []*TreeNode `json:"children"`
+}
+
+
+type JIAZUCASE struct {
+    ID int  `form:"id"`
+    Name       string    `form:"name"`
+}

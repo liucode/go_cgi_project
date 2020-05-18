@@ -4,7 +4,8 @@ import (
     "go_cgi_project/common"
     "github.com/jinzhu/gorm"
     _ "github.com/jinzhu/gorm/dialects/mysql"
-	_"sort"
+    _"sort"
+    "encoding/json"
 )
 var db  *gorm.DB
 
@@ -19,6 +20,105 @@ func init() {
 }
 
 
+func XueliDb()  *gorm.DB{
+    t_db, err := gorm.Open("mysql", "liu:123456@tcp(118.24.92.135:3306)/xueli?charset=utf8")
+    if err != nil{
+        fmt.Println("failed to connect database "+err.Error())
+    }
+    t_db.DB().SetMaxIdleConns(1000)
+    t_db.DB().SetMaxOpenConns(1000)
+    return t_db
+}
+
+
+func DB2NODE(data *common.JiaZu) *common.TreeNode{
+    node := new(common.TreeNode)
+    node.Name = data.Name
+    node.Value = data.Other
+    return node
+}
+
+
+func GetAll() (map[int][]int,map[int]*common.JiaZu){
+    all := make([]*common.JiaZu,0)
+    f_db := XueliDb()
+    f_db.Table("jiazu").Find(&all)
+    datamap := make(map[int]*common.JiaZu,0)
+    for _,temp := range all{
+        datamap[temp.Id] = temp
+    }
+
+
+    allmap := make(map[int][]int)
+    for _,temp := range all{
+        var c_list []int
+        for _,temp2:=range all{
+            if temp.Id == temp2.FatherId{
+                c_list = append(c_list,temp2.Id)
+            }
+        }
+        allmap[temp.Id] = c_list
+    } 
+    return allmap,datamap
+}
+
+
+
+
+
+func GetTreeByChildren(father *common.JiaZu) []*common.TreeNode {
+    f_db := XueliDb()
+    childrens:=make([]*common.JiaZu,0)
+    childrens_node:=make([]*common.TreeNode,0)
+    f_db.Table("jiazu").Where("father_id=?",father.Id).Find(&childrens)
+    for _,children:=range childrens{
+        children_node := DB2NODE(children)
+        out_children := GetTreeByChildren(children)
+        children_node.Children = out_children
+        childrens_node = append(childrens_node,children_node)
+    } 
+    fmt.Println(childrens_node)
+    return childrens_node
+}
+
+func GetTreeByName(name string) string{
+    father := new(common.JiaZu)
+    f_db := XueliDb()
+    f_db.Table("jiazu").Where("name=?",name).First(father)
+    father_node :=DB2NODE(father)
+    father_node.Children = GetTreeByChildren(father)
+    result, _ := json.Marshal(father_node)
+    return string(result)
+}
+
+
+func GetTreeById2(id int) string{
+    father := new(common.JiaZu)
+    f_db := XueliDb()
+    f_db.Table("jiazu").Where("id=?",id).First(father)
+    father_node :=DB2NODE(father)
+    father_node.Children = GetTreeByChildren(father)
+    result, _ := json.Marshal(father_node)
+    return string(result)
+}
+
+func GetTreeList(ids []int,allmap map[int][]int,datamap map[int]*common.JiaZu)[]*common.TreeNode{
+    childrens_node:=make([]*common.TreeNode,0)
+    for _,id := range ids{
+        children_node :=DB2NODE(datamap[id])
+        children_node.Children = GetTreeList(allmap[id],allmap,datamap)
+        childrens_node = append(childrens_node,children_node)
+    }
+    return childrens_node
+}
+
+func GetTreeById(id int) string{
+    allmap,datamap := GetAll()
+    father_node :=DB2NODE(datamap[id])
+    father_node.Children = GetTreeList(allmap[id],allmap,datamap)
+    result, _ := json.Marshal(father_node)
+    return string(result)
+}
 
 func GetV(appid int,k string) (v string){
     var data common.KV
